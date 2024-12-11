@@ -36,4 +36,4 @@ A live demo of the application is available [here](http://resistorcalc-web.azure
 
 The above command will build an Angular app and open your browser and load the Resistor Rating Calculator app. You can test and change the app at your will.
 
-This is a Pull request created by Vishal and it has a mstk that copilot shd do a cde rviews on.
+This is a Pull request created by Vishal and it has a mistake that copilot should do a code reviews on.
