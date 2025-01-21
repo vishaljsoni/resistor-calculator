@@ -34,4 +34,4 @@ A live demo of the application is available [here](http://resistorcalc-web.azure
 6. Save both files and we are all set to run our client-side app too.
 7. Go to the integrated terminal again and run this command: `ng serve -o`.
 
-The above command will build an Angular app and open your browser and load the Resistor Rating Calculator app. You can test and change the app at your will.
+This is the change in my application. Ths shd be caught by Copilot Code review when I crte pl reqst and it should tell me I need to corrct some spellings.
