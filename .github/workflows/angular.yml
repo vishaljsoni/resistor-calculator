@@ -2,11 +2,11 @@ name: Angular Build and Test
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [ "upgrade-angular-dotnet" ]
     paths:
       - 'ResistorRatingCalculator.Web/**'
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ "upgrade-angular-dotnet" ]
     paths:
       - 'ResistorRatingCalculator.Web/**'
 

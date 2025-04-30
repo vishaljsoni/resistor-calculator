@@ -2,14 +2,14 @@ name: .NET Build and Test
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [ "upgrade-angular-dotnet" ]
     paths:
       - 'ResistorRating.Api/**'
       - 'ResistorRating.Library/**'
       - 'ResistorRating.Test/**'
       - '**.sln'
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ "upgrade-angular-dotnet" ]
     paths:
       - 'ResistorRating.Api/**'
       - 'ResistorRating.Library/**'
