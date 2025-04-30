@@ -1,4 +1,4 @@
-# Resistor Calculator
+# Resistor Calculator -TO DO: update it.
 A Simple Angular 6 client and ASP.Net Web Api 2 server project to calculate the resistance of resistors. This simple app uses Electric color code rings to calculate the resistance for the resistors. A user can pick one or all four color bands for a resistor to check the calculated resistance.
 
 For more details, please check this wiki link: [Electronic color code](https://en.wikipedia.org/wiki/Electronic_color_code)
