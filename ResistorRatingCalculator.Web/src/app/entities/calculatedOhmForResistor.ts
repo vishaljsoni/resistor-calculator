@@ -1,5 +1,5 @@
-export class CalculatedOhmForResistor {
-    MinimumOhm: number;
-    MaximumOhm: number;
-    ActualOhm: number;
+export interface CalculatedOhmForResistor {
+  ActualOhm: number;
+  MinimumOhm: number;
+  MaximumOhm: number;
 }

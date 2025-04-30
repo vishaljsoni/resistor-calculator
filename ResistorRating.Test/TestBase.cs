@@ -20,7 +20,8 @@ namespace ResistorRating.Test
                 {
                     var builder = new ContainerBuilder();
 
-                    AutofacBootstrap.Init(builder);
+                    // Register the Autofac module
+                    builder.RegisterModule(new AutofacBootstrap());
 
                     var container = builder.Build();
 

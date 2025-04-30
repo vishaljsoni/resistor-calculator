@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Autofac;
+﻿using Autofac;
 using ResistorRating.Library.Contracts;
 using ResistorRating.Library.Services;
 
 namespace ResistorRating.Library
 {
-    public class AutofacBootstrap
+    public class AutofacBootstrap : Module
     {
-        public static void Init(ContainerBuilder builder)
+        protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<LookupService>().As<ILookupService>();
-            builder.RegisterType<OhmValueCalculatorService>().As<IOhmValueCalculator>();
+            builder.RegisterType<LookupService>().As<ILookupService>().SingleInstance();
+            builder.RegisterType<OhmValueCalculatorService>().As<IOhmValueCalculator>().InstancePerDependency();
         }
     }
 }

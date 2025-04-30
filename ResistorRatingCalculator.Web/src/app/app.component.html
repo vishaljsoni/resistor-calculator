@@ -1,13 +1,14 @@
-<div fxLayout="column">
+<div class="app-container">
   <mat-toolbar color="primary" class="fixed-header">
-    <div fxLayout="row" fxLayoutAlign="space-between center" fxFlex>
+    <div class="toolbar-content">
       <div>Resistor Calculator</div>
       <div>Vishal Soni</div>
     </div>
   </mat-toolbar>
-  <mat-sidenav-container fullscreen style="margin-top: 64px !important;">
+  
+  <mat-sidenav-container class="main-container">
     <mat-sidenav-content>
-      <div fxLayout="column">
+      <div class="content-container">
         <mat-progress-bar mode="indeterminate" color="accent" *ngIf="isLookupLoading"></mat-progress-bar>
         <mat-card *ngIf="!isLookupLoading">
           <mat-card-header>
@@ -15,70 +16,81 @@
             <mat-card-subtitle>Resistor rating</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            <div fxLayout="row" fxLayoutGap="5%">
-              <div class="resistor-outline" fxFlexAlign="center" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="20px" fxFlex="220px">
+            <div class="resistor-container">
+              <div class="resistor-outline">
                 <div class="band" *ngIf="selectedBandA" [style.background-color]="getBackgroundColor(selectedBandA)"></div>
                 <div class="band" *ngIf="selectedBandB" [style.background-color]="getBackgroundColor(selectedBandB)"></div>
-                <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="50px">
+                <div class="right-bands">
                   <div class="band" *ngIf="selectedBandC" [style.background-color]="getBackgroundColor(selectedBandC)"></div>
                   <div *ngIf="!selectedBandC"></div>
                   <div class="band" *ngIf="selectedBandD && selectedBandD.RingName !== -4" [style.background-color]="getBackgroundColor(selectedBandD)"></div>
                 </div>
               </div>
-              <div fxFlex="20">
-                <div fxLayout="column" fxLayoutGap="10px">
+              
+              <div class="controls-container">
+                <div class="form-fields">
                   <mat-form-field>
-                    <mat-select [(value)]="selectedBandA" required placeholder="Band A" (selectionChange)="recalculateOhms()">
+                    <mat-label>Band A</mat-label>
+                    <mat-select [(ngModel)]="selectedBandA" required name="bandA" (selectionChange)="recalculateOhms()">
                       <mat-option *ngFor="let band of bandARings" [value]="band">{{band.RingDisplayValue}}</mat-option>
                     </mat-select>
                   </mat-form-field>
+                  
                   <mat-form-field>
-                    <mat-select [(value)]="selectedBandB" placeholder="Band B" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandA">
+                    <mat-label>Band B</mat-label>
+                    <mat-select [(ngModel)]="selectedBandB" name="bandB" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandA">
                       <mat-option [value]="null"> </mat-option>
                       <mat-option *ngFor="let band of bandBRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
                     </mat-select>
                   </mat-form-field>
+                  
                   <mat-form-field>
-                    <mat-select [(value)]="selectedBandC" placeholder="Band C" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandB">
-                      <mat-option [value]="null">  </mat-option>
+                    <mat-label>Band C</mat-label>
+                    <mat-select [(ngModel)]="selectedBandC" name="bandC" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandB">
+                      <mat-option [value]="null"> </mat-option>
                       <mat-option *ngFor="let band of bandCRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
                     </mat-select>
                   </mat-form-field>
+                  
                   <mat-form-field>
-                    <mat-select [(value)]="selectedBandD" placeholder="Band D" (selectionChange)="recalculateOhms()">
+                    <mat-label>Band D</mat-label>
+                    <mat-select [(ngModel)]="selectedBandD" name="bandD" (selectionChange)="recalculateOhms()">
                       <mat-option *ngFor="let band of bandDRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="space-around center" *ngIf="calculatedResult">
-                <div fxFlexAlign="center">
-                  <mat-card *ngIf="calculatedResult && calculatedResult.MinimumOhm !== calculatedResult.ActualOhm">
+              
+              <div class="results-container" *ngIf="calculatedResult">
+                <div class="result-card" *ngIf="calculatedResult && calculatedResult.MinimumOhm !== calculatedResult.ActualOhm">
+                  <mat-card>
                     <mat-card-header>
                       <mat-card-title>Minimum Ohm</mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                      <div class="mat-display-1 text-center">{{calculatedResult.MinimumOhm | number:'.1-5'}}</div>
+                      <div class="ohm-value text-center">{{calculatedResult.MinimumOhm | number:'.1-5'}}</div>
                     </mat-card-content>
                   </mat-card>
                 </div>
-                <div fxFlexAlign="center">
+                
+                <div class="result-card">
                   <mat-card>
                     <mat-card-header>
                       <mat-card-title>Actual Ohm</mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                      <div class="mat-display-1 text-center">{{calculatedResult.ActualOhm | number:'.1-5'}}</div>
+                      <div class="ohm-value text-center">{{calculatedResult.ActualOhm | number:'.1-5'}}</div>
                     </mat-card-content>
                   </mat-card>
                 </div>
-                <div fxFlexAlign="center">
-                  <mat-card *ngIf="calculatedResult && calculatedResult.MaximumOhm !== calculatedResult.ActualOhm">
+                
+                <div class="result-card" *ngIf="calculatedResult && calculatedResult.MaximumOhm !== calculatedResult.ActualOhm">
+                  <mat-card>
                     <mat-card-header>
                       <mat-card-title>Maximum Ohm</mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                      <div class="mat-display-1 text-center">{{calculatedResult.MaximumOhm | number:'.1-5'}}</div>
+                      <div class="ohm-value text-center">{{calculatedResult.MaximumOhm | number:'.1-5'}}</div>
                     </mat-card-content>
                   </mat-card>
                 </div>
