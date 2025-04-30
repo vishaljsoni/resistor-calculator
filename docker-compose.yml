@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ResistorRating.Api/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+    networks:
+      - resistor-network
+
+  web:
+    build:
+      context: .
+      dockerfile: ResistorRatingCalculator.Web/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - resistor-network
+
+networks:
+  resistor-network:
+    driver: bridge
