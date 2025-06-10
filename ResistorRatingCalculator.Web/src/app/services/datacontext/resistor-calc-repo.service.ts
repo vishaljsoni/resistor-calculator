@@ -7,7 +7,7 @@ import { CalculatedOhmForResistor } from '../../entities/calculatedOhmForResisto
   providedIn: 'root'
 })
 export class ResistorCalcRepoService {
-  private _restApiBase = 'http://resistorratingapi20180610112012.azurewebsites.net/api';
+  private _restApiBase = 'http://localhost:5000/api';
   constructor(private _http: HttpClient) { }
 
   /**
