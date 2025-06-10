@@ -1,22 +1,20 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using Xunit;
 
 namespace ResistorRating.Test
 {
-    [TestClass]
     public class LookupServiceTest : TestBase
     {
-        [TestMethod]
+        [Fact]
         public void LookupServiceExists()
         {
-            Assert.IsNotNull(LookupService);
+            Assert.NotNull(LookupService);
         }
 
-        [TestMethod]
+        [Fact]
         public void LookupServiceHasData()
         {
-            Assert.IsTrue(LookupService.GetAllColorRingTypes().ToList().Count > 0);
+            Assert.True(LookupService.GetAllColorRingTypes().ToList().Count > 0);
         }
     }
 }
