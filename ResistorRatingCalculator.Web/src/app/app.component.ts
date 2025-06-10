@@ -1,4 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { LookupRepoService } from './services/datacontext/lookup-repo.service';
 import { ElectronicColorRing, RingName } from './entities/electronicColorRing';
 import { LookupService } from './services/lookup.service';
@@ -7,6 +16,23 @@ import { CalculatedOhmForResistor } from './entities/calculatedOhmForResistor';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatSelectModule,
+    MatToolbarModule,
+    MatCardModule,
+    MatTooltipModule,
+    MatSidenavModule,
+    MatProgressBarModule,
+    FlexLayoutModule
+  ],
+  providers: [
+    LookupRepoService,
+    LookupService,
+    ResistorCalcRepoService
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -18,16 +44,17 @@ export class AppComponent implements OnInit {
   ) { }
 
   public isLookupLoading = true;
-  public bandARings: ElectronicColorRing[];
-  public bandBRings: ElectronicColorRing[];
-  public bandCRings: ElectronicColorRing[];
-  public bandDRings: ElectronicColorRing[];
-  public selectedBandA: ElectronicColorRing;
-  public selectedBandB: ElectronicColorRing;
-  public selectedBandC: ElectronicColorRing;
-  public selectedBandD: ElectronicColorRing;
-  public calculatedResult: CalculatedOhmForResistor;
-  private _allBands: ElectronicColorRing[];
+  public bandARings: ElectronicColorRing[] = [];
+  public bandBRings: ElectronicColorRing[] = [];
+  public bandCRings: ElectronicColorRing[] = [];
+  public bandDRings: ElectronicColorRing[] = [];
+  public selectedBandA: ElectronicColorRing | null = null;
+  public selectedBandB: ElectronicColorRing | null = null;
+  public selectedBandC: ElectronicColorRing | null = null;
+  public selectedBandD: ElectronicColorRing | null = null;
+  public calculatedResult: CalculatedOhmForResistor | null = null;
+  private _allBands: ElectronicColorRing[] = [];
+  
   ngOnInit (): void {
     this._lookupRepo.getLookupData().subscribe(data => {
       this._allBands = data;
@@ -44,7 +71,7 @@ export class AppComponent implements OnInit {
     this.selectedBandD = this.bandDRings[0];
   }
 
-  public getBackgroundColor (selectedBand: ElectronicColorRing) {
+  public getBackgroundColor (selectedBand: ElectronicColorRing | null): string {
     if (!selectedBand) {
       return 'aliceblue';
     }
@@ -72,7 +99,7 @@ export class AppComponent implements OnInit {
 
       this._resistorCalcRepo.calculateOhmValueWithTolerance(
         this.selectedBandA.RingCode,
-        this.selectedBandD.RingCode,
+        this.selectedBandD!.RingCode,
         bandBCode, bandCCode).subscribe(data => {
           this.calculatedResult = data;
         });
