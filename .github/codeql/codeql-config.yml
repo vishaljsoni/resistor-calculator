@@ -1,0 +1,27 @@
+name: "CodeQL Config"
+
+# Disable default setup to use custom configuration
+disable-default-path-filters: false
+
+# Exclude legacy .NET Framework projects from analysis
+# Focus on modern .NET Core 8 projects only
+paths-ignore:
+  - "ResistorRating.Api/**"
+  - "ResistorRating.Library/**" 
+  - "ResistorRating.Test/**"
+  - "ResistorRatingCalculator.Web/**"
+  - "ResistorRatingCalculator.sln"
+
+# Include only modern .NET Core projects
+paths:
+  - "ResistorRating.Api.Core/**"
+  - "ResistorRating.Library.Core/**"
+  - "ResistorRating.Test.Core/**"
+  - "ResistorRatingCalculator.Web.New/**"
+  - "ResistorRatingCalculator.Core.sln"
+
+# Languages to analyze
+languages:
+  - csharp
+  - javascript
+  - typescript
