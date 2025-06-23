@@ -1,0 +1,6 @@
+@ResistorRating.Api.Core_HostAddress = http://localhost:5265
+
+GET {{ResistorRating.Api.Core_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

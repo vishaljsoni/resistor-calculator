@@ -1,0 +1,96 @@
+<div class="app-container">
+  <mat-toolbar color="primary" class="fixed-header">
+    <div class="toolbar-content">
+      <div>Resistor Calculator</div>
+      <div>Vishal Soni</div>
+    </div>
+  </mat-toolbar>
+  <mat-sidenav-container fullscreen class="main-content">
+    <mat-sidenav-content>
+      <div class="content-container">
+        <mat-progress-bar mode="indeterminate" color="accent" *ngIf="isLookupLoading"></mat-progress-bar>
+        <mat-card *ngIf="!isLookupLoading">
+          <mat-card-header>
+            <mat-card-title>Calculate and rate electronic component</mat-card-title>
+            <mat-card-subtitle>Resistor rating</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="main-layout">
+              <div class="resistor-outline">
+                <div class="band" *ngIf="selectedBandA" [style.background-color]="getBackgroundColor(selectedBandA)"></div>
+                <div class="band" *ngIf="selectedBandB" [style.background-color]="getBackgroundColor(selectedBandB)"></div>
+                <div class="band-gap">
+                  <div class="band" *ngIf="selectedBandC" [style.background-color]="getBackgroundColor(selectedBandC)"></div>
+                  <div *ngIf="!selectedBandC"></div>
+                  <div class="band" *ngIf="selectedBandD && selectedBandD.RingName !== -4" [style.background-color]="getBackgroundColor(selectedBandD)"></div>
+                </div>
+              </div>
+              <div class="controls-section">
+                <div class="form-controls">
+                  <mat-form-field>
+                    <mat-label>Band A</mat-label>
+                    <mat-select [(value)]="selectedBandA" required (selectionChange)="recalculateOhms()">
+                      <mat-option *ngFor="let band of bandARings" [value]="band">{{band.RingDisplayValue}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Band B</mat-label>
+                    <mat-select [(value)]="selectedBandB" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandA">
+                      <mat-option [value]="null"> </mat-option>
+                      <mat-option *ngFor="let band of bandBRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Band C</mat-label>
+                    <mat-select [(value)]="selectedBandC" (selectionChange)="recalculateOhms()" [disabled]="!selectedBandB">
+                      <mat-option [value]="null">  </mat-option>
+                      <mat-option *ngFor="let band of bandCRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Band D</mat-label>
+                    <mat-select [(value)]="selectedBandD" (selectionChange)="recalculateOhms()">
+                      <mat-option *ngFor="let band of bandDRings" [value]="band">{{band.RingDisplayValue}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="results-section" *ngIf="calculatedResult">
+                <div class="result-card">
+                  <mat-card *ngIf="calculatedResult && calculatedResult.MinimumOhm !== calculatedResult.ActualOhm">
+                    <mat-card-header>
+                      <mat-card-title>Minimum Ohm</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                      <div class="result-value">{{calculatedResult.MinimumOhm | number:'.1-5'}}</div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+                <div class="result-card">
+                  <mat-card>
+                    <mat-card-header>
+                      <mat-card-title>Actual Ohm</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                      <div class="result-value">{{calculatedResult.ActualOhm | number:'.1-5'}}</div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+                <div class="result-card">
+                  <mat-card *ngIf="calculatedResult && calculatedResult.MaximumOhm !== calculatedResult.ActualOhm">
+                    <mat-card-header>
+                      <mat-card-title>Maximum Ohm</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                      <div class="result-value">{{calculatedResult.MaximumOhm | number:'.1-5'}}</div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
