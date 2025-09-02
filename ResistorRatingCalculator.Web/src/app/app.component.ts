@@ -18,16 +18,16 @@ export class AppComponent implements OnInit {
   ) { }
 
   public isLookupLoading = true;
-  public bandARings: ElectronicColorRing[];
-  public bandBRings: ElectronicColorRing[];
-  public bandCRings: ElectronicColorRing[];
-  public bandDRings: ElectronicColorRing[];
-  public selectedBandA: ElectronicColorRing;
-  public selectedBandB: ElectronicColorRing;
-  public selectedBandC: ElectronicColorRing;
-  public selectedBandD: ElectronicColorRing;
-  public calculatedResult: CalculatedOhmForResistor;
-  private _allBands: ElectronicColorRing[];
+  public bandARings!: ElectronicColorRing[];
+  public bandBRings!: ElectronicColorRing[];
+  public bandCRings!: ElectronicColorRing[];
+  public bandDRings!: ElectronicColorRing[];
+  public selectedBandA!: ElectronicColorRing;
+  public selectedBandB?: ElectronicColorRing | null;
+  public selectedBandC?: ElectronicColorRing | null;
+  public selectedBandD!: ElectronicColorRing;
+  public calculatedResult?: CalculatedOhmForResistor | null;
+  private _allBands!: ElectronicColorRing[];
   ngOnInit (): void {
     this._lookupRepo.getLookupData().subscribe(data => {
       this._allBands = data;

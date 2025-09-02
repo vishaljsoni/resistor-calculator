@@ -7,7 +7,7 @@ import { ElectronicColorRing } from 'src/app/entities/electronicColorRing';
   providedIn: 'root'
 })
 export class LookupRepoService {
-  private _restApiBase = 'http://resistorratingapi20180610112012.azurewebsites.net/api';
+  private _restApiBase = 'http://localhost:5000/api';
   private headers = new HttpHeaders().set('Content-Type', 'application/json');
 
   constructor(private _http: HttpClient) {

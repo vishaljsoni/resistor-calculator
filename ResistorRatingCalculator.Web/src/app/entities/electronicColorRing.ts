@@ -1,11 +1,11 @@
 
 export class ElectronicColorRing {
-    RingName: RingName;
-    RingDisplayValue: string;
-    RingCode: string;
-    SignificantFigure: number;
-    Multiplier: number;
-    TolerancePercent: number;
+    RingName!: RingName;
+    RingDisplayValue!: string;
+    RingCode!: string;
+    SignificantFigure?: number | null;
+    Multiplier?: number | null;
+    TolerancePercent?: number | null;
 }
 
 export enum RingName {

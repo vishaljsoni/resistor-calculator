@@ -1,13 +1,12 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResistorRating.Api", "ResistorRating.Api\ResistorRating.Api.csproj", "{E069EA04-D82D-4550-8F66-0960B0193295}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResistorRating.Api", "ResistorRating.Api\ResistorRating.Api.csproj", "{E069EA04-D82D-4550-8F66-0960B0193295}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResistorRating.Test", "ResistorRating.Test\ResistorRating.Test.csproj", "{27072415-BBFC-4083-B57B-A35941745F9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResistorRating.Test", "ResistorRating.Test\ResistorRating.Test.csproj", "{27072415-BBFC-4083-B57B-A35941745F9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResistorRating.Library", "ResistorRating.Library\ResistorRating.Library.csproj", "{8FBBA282-8822-483F-A4EE-EACA91952292}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResistorRating.Library", "ResistorRating.Library\ResistorRating.Library.csproj", "{8FBBA282-8822-483F-A4EE-EACA91952292}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

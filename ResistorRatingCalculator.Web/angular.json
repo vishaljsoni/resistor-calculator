@@ -25,7 +25,11 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "inlineStyleLanguage": "css",
+            "optimization": {
+              "fonts": false
+            }
           },
           "configurations": {
             "production": {
@@ -50,18 +54,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "resistorCalculator:build"
+            "buildTarget": "resistorCalculator:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "resistorCalculator:build:production"
+              "buildTarget": "resistorCalculator:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "resistorCalculator:build"
+            "buildTarget": "resistorCalculator:build"
           }
         },
         "test": {
