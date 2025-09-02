@@ -25,7 +25,11 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "inlineStyleLanguage": "css",
+            "optimization": {
+              "fonts": false
+            }
           },
           "configurations": {
             "production": {
