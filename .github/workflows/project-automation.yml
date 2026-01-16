@@ -1,0 +1,36 @@
+# Project Automation Workflow
+# This workflow helps automate project board management
+
+name: Project Board Automation
+
+on:
+  issues:
+    types: [opened, reopened, closed, assigned]
+  pull_request:
+    types: [opened, closed, converted_to_draft, ready_for_review]
+
+jobs:
+  update-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issue to Sprint 1 project
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: |
+          echo "Issue opened - would add to project board"
+          # Note: Actual project board integration requires GitHub token with project permissions
+          # This is a placeholder for the automation logic
+
+      - name: Move to In Progress when assigned
+        if: github.event_name == 'issues' && github.event.action == 'assigned'
+        run: |
+          echo "Issue assigned - would move to In Progress column"
+
+      - name: Move to Done when closed
+        if: github.event_name == 'issues' && github.event.action == 'closed'
+        run: |
+          echo "Issue closed - would move to Done column"
+
+      - name: Move to In Review when PR opened
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        run: |
+          echo "PR opened - would move related issues to In Review column"

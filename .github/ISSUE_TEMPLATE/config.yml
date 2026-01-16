@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Sprint 1 Planning
+    url: https://github.com/vishaljsoni/resistor-calculator/blob/main/docs/sprint-1/README.md
+    about: View Sprint 1 planning documentation
