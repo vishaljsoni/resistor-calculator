@@ -1,25 +1,23 @@
-﻿using ResistorRating.Library.Contracts;
+﻿using Microsoft.AspNetCore.Mvc;
+using ResistorRating.Library.Contracts;
 using ResistorRating.Library.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 
-namespace ResistorRating.Api.Controllers
+namespace ResistorRating.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class LookupController : ControllerBase
 {
-    public class LookupController : ApiController
+    private readonly ILookupService _lookupService;
+
+    public LookupController(ILookupService lookupService)
     {
-        private ILookupService _lookupService;
-        public LookupController(ILookupService lookupService)
-        {
-            _lookupService = lookupService;
-        }
-        // GET: api/Lookup
-        public IQueryable<ElectronicColorRing> Get()
-        {
-            return _lookupService.GetAllColorRingTypes();
-        }
+        _lookupService = lookupService;
+    }
+
+    [HttpGet]
+    public ActionResult<IEnumerable<ElectronicColorRing>> Get()
+    {
+        return Ok(_lookupService.GetAllColorRingTypes());
     }
 }

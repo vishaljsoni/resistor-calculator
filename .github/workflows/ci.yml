@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, '**' ]
+  pull_request:
+    branches: [ main, master, '**' ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore .NET dependencies
+        run: dotnet restore ResistorRatingCalculator.sln
+
+      - name: Build .NET
+        run: dotnet build ResistorRatingCalculator.sln --configuration Release --no-restore
+
+      - name: Test .NET
+        run: dotnet test ResistorRatingCalculator.sln --configuration Release --no-build
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: ResistorRatingCalculator.Web/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: ResistorRatingCalculator.Web
+        run: npm ci
+
+      - name: Build Angular
+        working-directory: ResistorRatingCalculator.Web
+        run: npm run build
