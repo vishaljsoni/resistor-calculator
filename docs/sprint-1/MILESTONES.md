@@ -21,7 +21,7 @@ This document explains how to configure the Sprint 1 milestone in GitHub.
   
   Sprint Goal: Deliver a playable MVP with core mechanics, first Devil Fruit power, and hub island prototype.
   
-  Duration: 2 weeks (Jan 16 - Jan 29, 2026)
+  Duration: 2 weeks (January 16 - January 29, 2026)
   
   Deliverables:
   - Player controller v0.1
@@ -123,7 +123,7 @@ Create a project board view filtered by milestone:
 
 ## Milestone Best Practices
 
-1. **Set Realistic Due Dates**: Sprint 1 ends Jan 29, 2026
+1. **Set Realistic Due Dates**: Sprint 1 ends January 29, 2026
 2. **Don't Overload**: Only include work committed to in sprint planning
 3. **Update Regularly**: Close issues as they're completed
 4. **Review Progress**: Check milestone daily during standup
@@ -133,9 +133,9 @@ Create a project board view filtered by milestone:
 
 Track burndown manually or with GitHub Insights:
 
-1. **Day 1** (Jan 16): 9 issues open
-2. **Day 5** (Jan 20): Target 50% complete (~4-5 issues closed)
-3. **Day 10** (Jan 29): Target 100% complete (all 9 issues closed)
+1. **Day 1** (January 16): 9 issues open
+2. **Day 5** (January 20): Target 50% complete (~4-5 issues closed)
+3. **Day 10** (January 29): Target 100% complete (all 9 issues closed)
 
 ### Tracking Formula
 
