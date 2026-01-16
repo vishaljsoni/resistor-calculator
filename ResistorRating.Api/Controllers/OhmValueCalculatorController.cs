@@ -1,55 +1,38 @@
-﻿using ResistorRating.Library.Contracts;
+﻿using Microsoft.AspNetCore.Mvc;
+using ResistorRating.Library.Contracts;
 using ResistorRating.Library.Exceptions;
 using ResistorRating.Library.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Description;
 
-namespace ResistorRating.Api.Controllers
+namespace ResistorRating.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class OhmValueCalculatorController : ControllerBase
 {
-    public class OhmValueCalculatorController : ApiController
+    private readonly IOhmValueCalculator _ohmValueCalculatorService;
+
+    public OhmValueCalculatorController(IOhmValueCalculator ohmValueCalculator)
     {
-        private IOhmValueCalculator _ohmValueCalculatorService;
+        _ohmValueCalculatorService = ohmValueCalculator;
+    }
 
-        public OhmValueCalculatorController(IOhmValueCalculator ohmValueCalculator)
+    [HttpGet("{bandACode}/{bandDCode}/{bandBCode?}/{bandCCode?}")]
+    [ProducesResponseType(typeof(CalculatedOhmForResistor), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<CalculatedOhmForResistor> Get(string bandACode, string bandDCode, string? bandBCode = "", string? bandCCode = "")
+    {
+        try
         {
-            _ohmValueCalculatorService = ohmValueCalculator;
+            var result = _ohmValueCalculatorService.CalculateOhmValue(bandACode, bandDCode, bandBCode ?? string.Empty, bandCCode ?? string.Empty);
+            return Ok(result);
         }
-
-        [HttpGet]
-        [Route("api/{OhmValueCalculator}/{bandACode}/{bandDCode}/{bandBCode?}/{bandCCode?}")]
-        [ActionName("GetOhmValueWithTolerance")]
-        [ResponseType(typeof(CalculatedOhmForResistor))]
-        public CalculatedOhmForResistor Get(string bandACode, string bandDCode, string bandBCode = "", string bandCCode = "")
+        catch (BandNotFoundException ex)
         {
-            CalculatedOhmForResistor returnValue;
-            try
-            {
-                returnValue = _ohmValueCalculatorService.CalculateOhmValue(bandACode, bandDCode, bandBCode, bandCCode);
-            }
-            catch (BandNotFoundException ex)
-            {
-                var resp = new HttpResponseMessage(HttpStatusCode.NoContent)
-                {
-                    Content = new StringContent(ex.ExceptionMessage),
-                    ReasonPhrase = "Color band not found."
-                };
-                throw new HttpResponseException(resp);
-            }
-            catch (WrongColorBandSelectedException ex)
-            {
-                var resp = new HttpResponseMessage(HttpStatusCode.NoContent)
-                {
-                    Content = new StringContent(ex.ExceptionMessage),
-                    ReasonPhrase = "Wrong Color band selected. We can't rate the resistor."
-                };
-                throw new HttpResponseException(resp);
-            }
-            return returnValue;
+            return BadRequest(new { message = ex.ExceptionMessage });
+        }
+        catch (WrongColorBandSelectedException ex)
+        {
+            return BadRequest(new { message = ex.ExceptionMessage });
         }
     }
 }

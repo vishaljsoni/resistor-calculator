@@ -1,33 +1,24 @@
-﻿using Autofac;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ResistorRating.Library;
 using ResistorRating.Library.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ResistorRating.Test
 {
     public class TestBase
     {
-        private IContainer _autofacContainer;
-        protected IContainer AutofacContainer
+        private ServiceProvider? _serviceProvider;
+        protected ServiceProvider ServiceProvider
         {
             get
             {
-                if (_autofacContainer == null)
+                if (_serviceProvider == null)
                 {
-                    var builder = new ContainerBuilder();
-
-                    AutofacBootstrap.Init(builder);
-
-                    var container = builder.Build();
-
-                    _autofacContainer = container;
+                    var services = new ServiceCollection();
+                    services.AddResistorRatingServices();
+                    _serviceProvider = services.BuildServiceProvider();
                 }
 
-                return _autofacContainer;
+                return _serviceProvider;
             }
         }
 
@@ -35,7 +26,7 @@ namespace ResistorRating.Test
         {
             get
             {
-                return AutofacContainer.Resolve<ILookupService>();
+                return ServiceProvider.GetRequiredService<ILookupService>();
             }
         }
 
@@ -43,9 +34,8 @@ namespace ResistorRating.Test
         {
             get
             {
-                return AutofacContainer.Resolve<IOhmValueCalculator>();
+                return ServiceProvider.GetRequiredService<IOhmValueCalculator>();
             }
         }
     }
 }
-
