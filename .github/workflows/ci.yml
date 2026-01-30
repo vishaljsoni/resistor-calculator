@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: ResistorRatingCalculator.Web/package-lock.json
+
+    - name: Restore .NET dependencies
+      run: dotnet restore
+
+    - name: Build .NET solution
+      run: dotnet build --no-restore
+
+    - name: Run .NET tests
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Install Angular dependencies
+      working-directory: ResistorRatingCalculator.Web
+      run: npm ci
+
+    - name: Build Angular application
+      working-directory: ResistorRatingCalculator.Web
+      run: npm run build
+
+    - name: Lint Angular application
+      working-directory: ResistorRatingCalculator.Web
+      run: npm run lint
+
+  build-artifacts:
+    runs-on: macos-latest
+    needs: test
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: ResistorRatingCalculator.Web/package-lock.json
+
+    - name: Build .NET Release
+      run: dotnet build --configuration Release
+
+    - name: Install Angular dependencies
+      working-directory: ResistorRatingCalculator.Web
+      run: npm ci
+
+    - name: Build Angular production
+      working-directory: ResistorRatingCalculator.Web
+      run: npm run build -- --configuration production
+
+    - name: Upload .NET artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dotnet-app
+        path: |
+          ResistorRating.Api/bin/Release/
+          ResistorRating.Library/bin/Release/
+
+    - name: Upload Angular artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: angular-app
+        path: ResistorRatingCalculator.Web/dist/

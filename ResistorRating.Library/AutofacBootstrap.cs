@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Autofac;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ResistorRating.Library.Contracts;
 using ResistorRating.Library.Services;
 
 namespace ResistorRating.Library
 {
-    public class AutofacBootstrap
+    public static class ServiceCollectionExtensions
     {
-        public static void Init(ContainerBuilder builder)
+        public static IServiceCollection AddResistorRatingServices(this IServiceCollection services)
         {
-            builder.RegisterType<LookupService>().As<ILookupService>();
-            builder.RegisterType<OhmValueCalculatorService>().As<IOhmValueCalculator>();
+            services.AddTransient<ILookupService, LookupService>();
+            services.AddTransient<IOhmValueCalculator, OhmValueCalculatorService>();
+            return services;
         }
     }
 }
