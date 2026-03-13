@@ -1,0 +1,350 @@
+# Angular Dependency Updater
+#
+# Agentic workflow that keeps Angular packages up to date, similar to Dependabot
+# but Angular-aware.  It uses `ng update` (which applies official Angular
+# migration schematics) instead of a plain `npm install`, so that TypeScript,
+# RxJS, and any other Angular-coordinated peers are updated together and
+# automated code migrations run automatically.
+#
+# Triggers
+# --------
+#   • Scheduled – every Monday at 06:00 UTC  (adjust the cron if you prefer)
+#   • workflow_dispatch – run manually from the Actions tab; optionally pass a
+#     target_version to pin the upgrade to a specific Angular major.
+#
+# What it does
+# ------------
+#   1. Reads the installed @angular/core version from package.json.
+#   2. Queries the npm registry for the desired target version.
+#   3. Skips without error if the project is already at (or ahead of) the target.
+#   4. Calls .github/scripts/fetch-angular-changelog.js to download the GitHub
+#      release notes for every release between the two versions and detect
+#      BREAKING CHANGES sections.
+#   5. Runs `ng update` with Angular's official migration schematics.
+#   6. Builds and tests the project to validate the upgrade.
+#   7. Opens a PR (or updates an existing one for the same target version) with
+#      a structured body showing breaking changes, a changelog summary, and the
+#      build / test outcome.
+
+name: Angular Dependency Updater
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: >
+          Target Angular major version to upgrade to (e.g. "17").
+          Leave blank to upgrade to the absolute latest stable release.
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-angular:
+    name: Check and update Angular packages
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ResistorRatingCalculator.Web
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Full history lets `ng update` detect migration boundaries correctly
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------------
+      # 2. Node.js setup
+      # -----------------------------------------------------------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # -----------------------------------------------------------------------
+      # 3. Detect current Angular version installed in the project
+      # -----------------------------------------------------------------------
+      - name: Detect current Angular version
+        id: current
+        run: |
+          RAW=$(node -p "require('./package.json').dependencies['@angular/core']")
+          # Strip semver range prefixes (^ ~ >= etc.) and keep major.minor.patch
+          VERSION=$(echo "$RAW" | sed 's/[^0-9.]//g' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current @angular/core: $VERSION"
+
+      # -----------------------------------------------------------------------
+      # 4. Resolve the target version from npm
+      # -----------------------------------------------------------------------
+      - name: Resolve target Angular version from npm
+        id: target
+        run: |
+          INPUT="${{ github.event.inputs.target_version }}"
+          if [ -n "$INPUT" ]; then
+            # If the user gave a major version (e.g. "17"), resolve the latest
+            # patch within that major; otherwise treat it as a full version tag.
+            if echo "$INPUT" | grep -qE '^[0-9]+$'; then
+              VERSION=$(npm view "@angular/core@$INPUT" version 2>/dev/null \
+                        || npm view "@angular/core@^$INPUT" version 2>/dev/null)
+            else
+              VERSION="$INPUT"
+            fi
+          else
+            VERSION=$(npm view @angular/core version)
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Target @angular/core: $VERSION"
+
+      # -----------------------------------------------------------------------
+      # 5. Compare versions – skip if already up to date
+      # -----------------------------------------------------------------------
+      - name: Check whether an upgrade is needed
+        id: check
+        run: |
+          node - << 'EOF'
+          const cur = "${{ steps.current.outputs.version }}";
+          const tgt = "${{ steps.target.outputs.version }}";
+          const parse = (v) => v.split(".").map(Number);
+          const [cMaj, cMin, cPat] = parse(cur);
+          const [tMaj, tMin, tPat] = parse(tgt);
+          const needed =
+            tMaj > cMaj ||
+            (tMaj === cMaj && tMin > cMin) ||
+            (tMaj === cMaj && tMin === cMin && tPat > cPat);
+          const fs = require("fs");
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `needed=${needed}\n`);
+          console.log(
+            needed
+              ? `Upgrade needed: ${cur} → ${tgt}`
+              : `Already at ${cur}, no upgrade needed.`
+          );
+          EOF
+
+      # -----------------------------------------------------------------------
+      # 6. Fetch changelog and detect breaking changes
+      # -----------------------------------------------------------------------
+      - name: Fetch Angular changelog and detect breaking changes
+        id: changelog
+        if: steps.check.outputs.needed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node ../.github/scripts/fetch-angular-changelog.js \
+            "${{ steps.current.outputs.version }}" \
+            "${{ steps.target.outputs.version }}" \
+            > /tmp/changelog.json
+
+          echo "Changelog JSON:"
+          cat /tmp/changelog.json
+
+          # Write multi-line outputs using heredoc delimiters
+          {
+            echo "breaking_changes<<CLEOF"
+            node -e "const d=require('/tmp/changelog.json'); console.log(d.breakingChanges);"
+            echo "CLEOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "summary<<CLEOF"
+            node -e "const d=require('/tmp/changelog.json'); console.log(d.summary);"
+            echo "CLEOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "release_count<<CLEOF"
+            node -e "const d=require('/tmp/changelog.json'); console.log(d.releaseCount);"
+            echo "CLEOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 7. Install existing dependencies (required before ng update)
+      # -----------------------------------------------------------------------
+      - name: Install current dependencies
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          # Use --legacy-peer-deps to handle strict peer dep requirements
+          # that may conflict with the npm v7+ resolver.
+          npm install --legacy-peer-deps
+
+      # -----------------------------------------------------------------------
+      # 8. Run `ng update` – Angular's official migration tool
+      #    This updates package.json AND runs TypeScript / template migrations.
+      # -----------------------------------------------------------------------
+      - name: Run ng update
+        id: ng_update
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+
+          # Install the target version of the CLI globally so we can use it
+          # even when the local version predates the target.
+          npm install -g "@angular/cli@$TARGET" --legacy-peer-deps
+
+          # ng update requires that the working tree is clean; commit any
+          # package-lock.json changes made in step 7.
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add -A && git diff --cached --quiet || git commit -m "chore: install deps before ng update"
+
+          # Run ng update for the core Angular packages.
+          # --force            : continue even if peer-dep conflicts exist
+          # --allow-dirty      : allow running when the git tree is not pristine
+          # --create-commits   : let ng update commit each migration step
+          ng update \
+            "@angular/core@$TARGET" \
+            "@angular/cli@$TARGET" \
+            --force \
+            --allow-dirty \
+            --create-commits 2>&1 | tee /tmp/ng-update-output.txt || true
+
+          echo "update_output<<UEOF" >> "$GITHUB_OUTPUT"
+          tail -60 /tmp/ng-update-output.txt >> "$GITHUB_OUTPUT"
+          echo "UEOF" >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 9. Install updated dependencies
+      # -----------------------------------------------------------------------
+      - name: Install updated dependencies
+        if: steps.check.outputs.needed == 'true'
+        run: npm install --legacy-peer-deps
+
+      # -----------------------------------------------------------------------
+      # 10. Build – validate the upgrade compiles
+      # -----------------------------------------------------------------------
+      - name: Build project
+        id: build
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          npm run build -- --configuration production 2>&1 | tee /tmp/build-output.txt
+          BUILD_EXIT=${PIPESTATUS[0]}
+
+          if [ "$BUILD_EXIT" -eq 0 ]; then
+            echo "status=✅ Build succeeded" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=❌ Build failed — see PR body for details" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "log<<BEOF" >> "$GITHUB_OUTPUT"
+          tail -40 /tmp/build-output.txt >> "$GITHUB_OUTPUT"
+          echo "BEOF" >> "$GITHUB_OUTPUT"
+
+          # Do not fail the workflow — we still want to open the PR so that
+          # developers can see what needs fixing after the upgrade.
+          exit 0
+
+      # -----------------------------------------------------------------------
+      # 11. Test – validate the upgrade passes unit tests
+      # -----------------------------------------------------------------------
+      - name: Run unit tests
+        id: test
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          npm test -- --watch=false --browsers=ChromeHeadless 2>&1 \
+            | tee /tmp/test-output.txt || true
+
+          if grep -q "FAILED" /tmp/test-output.txt; then
+            echo "status=❌ Some tests failed — see PR body for details" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=✅ All tests passed" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "log<<TEOF" >> "$GITHUB_OUTPUT"
+          tail -40 /tmp/test-output.txt >> "$GITHUB_OUTPUT"
+          echo "TEOF" >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 12. Open (or update) a Pull Request
+      # -----------------------------------------------------------------------
+      - name: Create or update Pull Request
+        if: steps.check.outputs.needed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ResistorRatingCalculator.Web
+          branch: chore/angular-update-v${{ steps.target.outputs.version }}
+          commit-message: |
+            chore(deps): upgrade Angular from v${{ steps.current.outputs.version }} to v${{ steps.target.outputs.version }}
+          title: "chore(deps): upgrade Angular to v${{ steps.target.outputs.version }}"
+          labels: |
+            dependencies
+            angular
+          body: |
+            ## 🔄 Angular Dependency Update
+
+            This PR was automatically generated by the **Angular Dependency Updater** workflow.
+            It upgrades Angular from **v${{ steps.current.outputs.version }}** to **v${{ steps.target.outputs.version }}** using `ng update`, which also applies any official Angular migration schematics.
+
+            ---
+
+            ### ⚠️ Breaking Changes (${{ steps.changelog.outputs.release_count }} release(s) in range)
+
+            ${{ steps.changelog.outputs.breaking_changes }}
+
+            ---
+
+            ### 📋 Changelog Summary
+
+            ${{ steps.changelog.outputs.summary }}
+
+            ---
+
+            ### 🔨 Build Status
+
+            ${{ steps.build.outputs.status }}
+
+            <details>
+            <summary>Build log (last 40 lines)</summary>
+
+            ```
+            ${{ steps.build.outputs.log }}
+            ```
+
+            </details>
+
+            ---
+
+            ### 🧪 Test Status
+
+            ${{ steps.test.outputs.status }}
+
+            <details>
+            <summary>Test log (last 40 lines)</summary>
+
+            ```
+            ${{ steps.test.outputs.log }}
+            ```
+
+            </details>
+
+            ---
+
+            ### 🔧 `ng update` Output
+
+            <details>
+            <summary>ng update log (last 60 lines)</summary>
+
+            ```
+            ${{ steps.ng_update.outputs.update_output }}
+            ```
+
+            </details>
+
+            ---
+
+            > **How to review this PR**
+            > 1. Check the ⚠️ Breaking Changes section and apply any manual fixes noted there.
+            > 2. Verify the build and test logs above are green.
+            > 3. If the build or tests failed, pull the branch locally, fix the issues, and push — this PR will update automatically.
+            > 4. Once everything is green, merge using **Squash and merge** to keep git history clean.

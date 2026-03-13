@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  # Keep GitHub Actions up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+
+  # Keep non-Angular npm dependencies up to date.
+  # Angular packages are managed by the dedicated Angular Dependency Updater
+  # workflow (.github/workflows/angular-update.yml) which uses `ng update`
+  # to also apply Angular migration schematics.
+  - package-ecosystem: "npm"
+    directory: "/ResistorRatingCalculator.Web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # Exclude all @angular/* packages — handled by the Angular updater workflow
+      - dependency-name: "@angular/*"
+      - dependency-name: "@angular-devkit/*"
